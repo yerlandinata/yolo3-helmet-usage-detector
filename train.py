@@ -14,10 +14,34 @@ from yolo3.utils import get_random_data
 
 
 def _main():
-    annotation_path = 'train.txt'
-    log_dir = 'logs/000/'
-    classes_path = 'model_data/voc_classes.txt'
+    annotation_path = 'train.txt' 
+    log_dir = 'logs/001/'
+    classes_path = 'model_data/coco_classes.txt'
     anchors_path = 'model_data/yolo_anchors.txt'
+    pretrained = 'model_data/yolo.h5'
+
+    cli = input('Log directory in logs/ (default: 001):\n')
+    if cli != '': log_dir = 'logs/' + cli + ('' if cli[-1] == '/' else '/')
+
+    cli = input('Annotation file relative to project root (default: train.txt):\n')
+    if cli != '': annotation_path = cli
+
+    cli = input('Classes file in model_data/ (default: coco_classes.txt):\n')
+    if cli != '': classes_path = 'model_data/' + cli
+
+    cli = input('Anchors file in model_data/ (default: yolo_anchors.txt):\n')
+    if cli != '': anchors_path = 'model_data/' + cli
+    
+    cli = input('Pretrained model relative to project root (default: model_data/yolo.h5):\n')
+    if cli != '': pretrained = cli
+
+    batch_size_freeze = input('batch_size for training with frozen layers (default 10): ')
+    batch_size_real = input('batch_size for real training (default 2): ')
+
+    cli = input('Choose what to freeze\n[1.] Darknet layer\n 2. Pretty much everything')
+    if cli == '': freeze_layer = 1
+    else: freeze_layer = int(cli)
+
     class_names = get_classes(classes_path)
     num_classes = len(class_names)
     anchors = get_anchors(anchors_path)
@@ -30,12 +54,12 @@ def _main():
             freeze_body=2, weights_path='model_data/tiny_yolo_weights.h5')
     else:
         model = create_model(input_shape, anchors, num_classes,
-            freeze_body=2, weights_path='model_data/yolo_weights.h5') # make sure you know what you freeze
+            freeze_body=freeze_layer, weights_path=pretrained) # make sure you know what you freeze
 
     logging = TensorBoard(log_dir=log_dir)
     checkpoint = ModelCheckpoint(log_dir + 'ep{epoch:03d}-loss{loss:.3f}-val_loss{val_loss:.3f}.h5',
-        monitor='val_loss', save_weights_only=True, save_best_only=True, period=3)
-    reduce_lr = ReduceLROnPlateau(monitor='val_loss', factor=0.1, patience=3, verbose=1)
+        monitor='val_loss', save_weights_only=True, save_best_only=True, period=4)
+    reduce_lr = ReduceLROnPlateau(monitor='val_loss', factor=0.1, patience=30, verbose=1)
     early_stopping = EarlyStopping(monitor='val_loss', min_delta=0, patience=10, verbose=1)
 
     val_split = 0.1
@@ -54,26 +78,26 @@ def _main():
             # use custom yolo_loss Lambda layer.
             'yolo_loss': lambda y_true, y_pred: y_pred})
 
-        batch_size = 32
+        batch_size = 10 if batch_size_freeze == '' else int(batch_size_freeze)
         print('Train on {} samples, val on {} samples, with batch size {}.'.format(num_train, num_val, batch_size))
         model.fit_generator(data_generator_wrapper(lines[:num_train], batch_size, input_shape, anchors, num_classes),
                 steps_per_epoch=max(1, num_train//batch_size),
                 validation_data=data_generator_wrapper(lines[num_train:], batch_size, input_shape, anchors, num_classes),
                 validation_steps=max(1, num_val//batch_size),
-                epochs=50,
+                epochs=12,
                 initial_epoch=0,
                 callbacks=[logging, checkpoint])
         model.save_weights(log_dir + 'trained_weights_stage_1.h5')
 
     # Unfreeze and continue training, to fine-tune.
     # Train longer if the result is not good.
-    if True:
+    if False:
         for i in range(len(model.layers)):
             model.layers[i].trainable = True
         model.compile(optimizer=Adam(lr=1e-4), loss={'yolo_loss': lambda y_true, y_pred: y_pred}) # recompile to apply the change
         print('Unfreeze all of the layers.')
 
-        batch_size = 32 # note that more GPU memory is required after unfreezing the body
+        batch_size = 2 if batch_size_real == '' else int(batch_size_real)
         print('Train on {} samples, val on {} samples, with batch size {}.'.format(num_train, num_val, batch_size))
         model.fit_generator(data_generator_wrapper(lines[:num_train], batch_size, input_shape, anchors, num_classes),
             steps_per_epoch=max(1, num_train//batch_size),
