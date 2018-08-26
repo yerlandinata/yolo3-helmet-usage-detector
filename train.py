@@ -14,31 +14,43 @@ from yolo3.utils import get_random_data
 
 
 def _main():
-    annotation_path = 'train.txt' 
+    train_path = 'train.txt'
+    val_path = 'validation.txt'
     log_dir = 'logs/001/'
     classes_path = 'model_data/coco_classes.txt'
     anchors_path = 'model_data/yolo_anchors.txt'
     pretrained = 'model_data/yolo.h5'
+    pretrained_tiny = 'model_data/tiny_yolo.h5'
+    epochs = 50
 
     cli = input('Log directory in logs/ (default: 001):\n')
     if cli != '': log_dir = 'logs/' + cli + ('' if cli[-1] == '/' else '/')
 
-    cli = input('Annotation file relative to project root (default: train.txt):\n')
-    if cli != '': annotation_path = cli
+    cli = input('Training file relative to project root (default: train.txt):\n')
+    if cli != '': train_path = cli
+
+    cli = input('Validation file relative to project root (default: validation.txt):\n')
+    if cli != '': val_path = cli
 
     cli = input('Classes file in model_data/ (default: coco_classes.txt):\n')
     if cli != '': classes_path = 'model_data/' + cli
 
     cli = input('Anchors file in model_data/ (default: yolo_anchors.txt):\n')
     if cli != '': anchors_path = 'model_data/' + cli
-    
+
     cli = input('Pretrained model relative to project root (default: model_data/yolo.h5):\n')
     if cli != '': pretrained = cli
+
+    cli = input('Pretrained tiny model relative to project root (default: model_data/tiny_yolo.h5):\n')
+    if cli != '': pretrained_tiny = cli
+
+    cli = input('Number of epochs (default: 50):\n')
+    if cli != '': epochs = int(cli)
 
     batch_size_freeze = input('batch_size for training with frozen layers (default 10): ')
     batch_size_real = input('batch_size for real training (default 2): ')
 
-    cli = input('Choose what to freeze\n[1.] Darknet layer\n 2. Pretty much everything')
+    cli = input('Choose what to freeze\n[1.] Darknet layer\n 2. Pretty much everything\n')
     if cli == '': freeze_layer = 1
     else: freeze_layer = int(cli)
 
@@ -51,47 +63,50 @@ def _main():
     is_tiny_version = len(anchors)==6 # default setting
     if is_tiny_version:
         model = create_tiny_model(input_shape, anchors, num_classes,
-            freeze_body=2, weights_path='model_data/tiny_yolo_weights.h5')
+            freeze_body=freeze_layer, weights_path=pretrained_tiny)
     else:
         model = create_model(input_shape, anchors, num_classes,
             freeze_body=freeze_layer, weights_path=pretrained) # make sure you know what you freeze
 
     logging = TensorBoard(log_dir=log_dir)
     checkpoint = ModelCheckpoint(log_dir + 'ep{epoch:03d}-loss{loss:.3f}-val_loss{val_loss:.3f}.h5',
-        monitor='val_loss', save_weights_only=True, save_best_only=True, period=4)
+        monitor='val_loss', save_weights_only=True, save_best_only=True, period=3)
     reduce_lr = ReduceLROnPlateau(monitor='val_loss', factor=0.1, patience=30, verbose=1)
     early_stopping = EarlyStopping(monitor='val_loss', min_delta=0, patience=10, verbose=1)
 
-    val_split = 0.1
-    with open(annotation_path) as f:
-        lines = f.readlines()
+    with open(train_path) as f:
+        trains = f.readlines()
+    with open(val_path) as f:
+        vals = f.readlines()
     np.random.seed(10101)
-    np.random.shuffle(lines)
+    np.random.shuffle(trains)
+    np.random.shuffle(vals)
     np.random.seed(None)
-    num_val = int(len(lines)*val_split)
-    num_train = len(lines) - num_val
+    num_train = len(trains)
+    num_val = len(vals)
+
 
     # Train with frozen layers first, to get a stable loss.
     # Adjust num epochs to your dataset. This step is enough to obtain a not bad model.
-    if True:
+    if False:
         model.compile(optimizer=Adam(lr=1e-3), loss={
             # use custom yolo_loss Lambda layer.
             'yolo_loss': lambda y_true, y_pred: y_pred})
 
         batch_size = 10 if batch_size_freeze == '' else int(batch_size_freeze)
         print('Train on {} samples, val on {} samples, with batch size {}.'.format(num_train, num_val, batch_size))
-        model.fit_generator(data_generator_wrapper(lines[:num_train], batch_size, input_shape, anchors, num_classes),
+        model.fit_generator(data_generator_wrapper(trains, batch_size, input_shape, anchors, num_classes),
                 steps_per_epoch=max(1, num_train//batch_size),
-                validation_data=data_generator_wrapper(lines[num_train:], batch_size, input_shape, anchors, num_classes),
+                validation_data=data_generator_wrapper(vals, batch_size, input_shape, anchors, num_classes),
                 validation_steps=max(1, num_val//batch_size),
-                epochs=12,
+                epochs=epochs,
                 initial_epoch=0,
                 callbacks=[logging, checkpoint])
         model.save_weights(log_dir + 'trained_weights_stage_1.h5')
 
     # Unfreeze and continue training, to fine-tune.
     # Train longer if the result is not good.
-    if False:
+    if True:
         for i in range(len(model.layers)):
             model.layers[i].trainable = True
         model.compile(optimizer=Adam(lr=1e-4), loss={'yolo_loss': lambda y_true, y_pred: y_pred}) # recompile to apply the change
@@ -99,12 +114,12 @@ def _main():
 
         batch_size = 2 if batch_size_real == '' else int(batch_size_real)
         print('Train on {} samples, val on {} samples, with batch size {}.'.format(num_train, num_val, batch_size))
-        model.fit_generator(data_generator_wrapper(lines[:num_train], batch_size, input_shape, anchors, num_classes),
+        model.fit_generator(data_generator_wrapper(trains, batch_size, input_shape, anchors, num_classes),
             steps_per_epoch=max(1, num_train//batch_size),
-            validation_data=data_generator_wrapper(lines[num_train:], batch_size, input_shape, anchors, num_classes),
+            validation_data=data_generator_wrapper(vals, batch_size, input_shape, anchors, num_classes),
             validation_steps=max(1, num_val//batch_size),
-            epochs=100,
-            initial_epoch=50,
+            epochs=epochs*2,
+            initial_epoch=epochs,
             callbacks=[logging, checkpoint, reduce_lr, early_stopping])
         model.save_weights(log_dir + 'trained_weights_final.h5')
 
