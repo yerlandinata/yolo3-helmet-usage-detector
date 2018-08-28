@@ -1,4 +1,6 @@
 """
+Author: Endrawan Andika Wicaksana
+
 Annotation
 ImageID,Source,LabelName,Confidence,XMin,XMax,YMin,YMax,IsOccluded,IsTruncated,IsGroupOf,IsDepiction,IsInside
 

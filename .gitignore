@@ -8,6 +8,14 @@ logs/
 *.csv
 model_data/*
 train.txt
+validation.txt
+test.txt
+ocr/digit/*
+ocr/letter/*
+map/ground-truth
+map/predicted
+map/results*
+*model*/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
