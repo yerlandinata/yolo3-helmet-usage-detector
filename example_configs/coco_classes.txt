@@ -1,0 +1,4 @@
+motor
+helm
+orang
+kepala
