@@ -26,8 +26,7 @@ OUTPUT_IMAGE_FOLDER_NAME = "img"
 MOTORCYCLE_LABEL = "/m/04_sv"
 HELMET_LABEL = "/m/0zvk5"
 PERSON_LABEL = "/m/01g317"
-HUMAN_HEAD_LABEL = "/m/04hgtk"
-valid_classes = [MOTORCYCLE_LABEL, HELMET_LABEL, PERSON_LABEL, HUMAN_HEAD_LABEL]
+valid_classes = [MOTORCYCLE_LABEL, HELMET_LABEL, PERSON_LABEL]
 
 def main():
     print('started at {} UTC+7'.format((datetime.now() + timedelta(hours=7)).strftime("%a, %d %B %Y %H:%M:%S")))
