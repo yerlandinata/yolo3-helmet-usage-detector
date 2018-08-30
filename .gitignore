@@ -15,7 +15,8 @@ ocr/letter/*
 map/ground-truth
 map/predicted
 map/results*
-*model*/
+/*model*/
+/train.cfg
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
