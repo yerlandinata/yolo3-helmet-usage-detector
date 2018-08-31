@@ -78,7 +78,7 @@ RUN ${PIP} install ${TF_PACKAGE}
 RUN mkdir /.local && chmod a+rwx /.local
 
 RUN apt-get install wget
-RUN wget -O drive https://drive.google.com/uc?id=0B3X9GlR6EmbnMHBMVWtKaEZXdDg && sudo mv drive /usr/bin/drive && sudo chmod 755 /usr/sbin/drive 
+RUN wget -O drive https://drive.google.com/uc?id=0B3X9GlR6EmbnMHBMVWtKaEZXdDg && mv drive /usr/bin/drive && chmod 755 /usr/sbin/drive 
 
 RUN ${PIP} install requests matplotlib keras Pillow
 
