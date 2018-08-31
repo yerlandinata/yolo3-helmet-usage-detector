@@ -75,9 +75,6 @@ RUN ${PIP} install --upgrade \
 ARG TF_PACKAGE=tensorflow-gpu
 RUN ${PIP} install ${TF_PACKAGE}
 
-COPY bashrc /etc/bash.bashrc
-RUN chmod a+rwx /etc/bash.bashrc
-
 RUN mkdir /.local && chmod a+rwx /.local
 
 RUN wget -O drive https://drive.google.com/uc?id=0B3X9GlR6EmbnMHBMVWtKaEZXdDg  
@@ -91,4 +88,4 @@ COPY . /project
 
 WORKDIR /project
 
-CMD ["bash", "-c", "source /etc/bash.bashrc && source train.sh"]
+CMD ["bash", "-c", "source train.sh"]
