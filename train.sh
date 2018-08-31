@@ -1,6 +1,7 @@
 #!/bin/bash
 
-drive && \
+ls .gdrive && \
+drive -c .gdrive && \
 python3 train.py && \
 epochTime=$(date +%s) && \
 mv ./logs/001/trained_weights_stage_1.h5 ./training_${epochTime}.h5 && \
