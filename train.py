@@ -35,7 +35,7 @@ def _main():
     pretraining = bool(int(config[11]))
     real_training = bool(int(config[12]))
 
-    print('started training at {} UTC+7'.format(datetime.now().strftime("%a, %d %B %Y %H:%M:%S")))
+    print('started training at {}'.format(datetime.now().strftime("%a, %d %B %Y %H:%M:%S")))
     print('training annotation: {}\n'.format(train_path))
     print('validation annotation: {}\n'.format(val_path))
     print('log dir: {}\n'.format(log_dir))
@@ -121,7 +121,7 @@ def _main():
 
     # Further training if needed.
     
-    print('training ended at {} UTC+7'.format(datetime.now().strftime("%a, %d %B %Y %H:%M:%S")))
+    print('training ended at {}'.format(datetime.now().strftime("%a, %d %B %Y %H:%M:%S")))
 
 
 def get_classes(classes_path):
