@@ -43,7 +43,9 @@ def main():
             else:
                 label_name = row[header.index('LabelName')]
                 image_id = row[header.index('ImageID')]
-                if label_name in valid_classes:
+                is_group = row[header.index('IsGroupOf')] == '1'
+                is_depiction = row[header.index('IsDepiction')] == '1'
+                if label_name in valid_classes and not is_group and not is_depiction:
                     if class_count[valid_classes.index(label_name)] >= LIMIT_IMAGES:
                         continue
                     class_count[valid_classes.index(label_name)] += 1
