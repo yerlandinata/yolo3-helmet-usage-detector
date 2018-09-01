@@ -72,8 +72,11 @@ def main():
                         valid_classes.index(label_name)]
                     )
 
-    print('class count temporarily: [MOTOR, HELMET, PERSON]')
+    print('bounding box count temporarily: [MOTOR, HELMET, PERSON]')
     print(class_count)
+
+    print('file count temporarily: [MOTOR, HELMET, PERSON]')
+    print([len(CONTAIN_CLASSES[i]) for i in valid_classes])
 
     # download image that have certain classes and convert it to pixel size
     image_box_pixel_size = {} # ImageID : [[XMin,YMin,XMax,YMax,class_id], ..]
