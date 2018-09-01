@@ -106,7 +106,9 @@ def main():
                     has_helmet = image_id in CONTAIN_CLASSES[HELMET_LABEL]
                     has_person = image_id in CONTAIN_CLASSES[PERSON_LABEL]
 
-                    if (has_person and (not has_motor) and (not has_helmet)) or \
+                    if has_person and len(image_box[image_id]) <= 3:
+                        pass # allow one person
+                    elif (has_person and (not has_motor) and (not has_helmet)) or \
                         (has_helmet and not has_person):
                         continue
 
@@ -140,11 +142,11 @@ def main():
                             int(image_box_data[XMAX] * width), \
                             int(image_box_data[YMAX] * height), \
                             image_box_data[LABEL]])
-                    if img_count % 50 == 0:
+                    if img_count % 300 == 0:
                         print('[{} s] downloaded images: {} images. Motorcyle({}), Helmet({}), Person({})'
                             .format(int(time()) - start, img_count, motorcycle_count, helmet_count, person_count))
                     
-            if line_count % 20000 == 0:
+            if line_count % 50000 == 0:
                 print('[{} s] read csv: {} lines'.format(int(time()) - start, line_count))
 
 
