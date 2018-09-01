@@ -79,6 +79,9 @@ def main():
     print([len(CONTAIN_CLASSES[i]) for i in valid_classes])
 
     # download image that have certain classes and convert it to pixel size
+    motorcycle_count = 0
+    helmet_count = 0
+    person_count = 0
     image_box_pixel_size = {} # ImageID : [[XMin,YMin,XMax,YMax,class_id], ..]
     with open(BOXABLE_FILE_NAME, 'r') as boxable:
         reader = csv.reader(boxable)
@@ -107,6 +110,10 @@ def main():
                         (has_helmet and not has_person):
                         continue
 
+                    motorcycle_count += int(has_motor)
+                    helmet_count += int(has_helmet)
+                    person_count += int(has_person)
+
                     # download image
                     idx = ''
                     if row[header.index('Thumbnail300KURL')].find('http') >= 0:
@@ -134,7 +141,8 @@ def main():
                             int(image_box_data[YMAX] * height), \
                             image_box_data[LABEL]])
                     if img_count % 50 == 0:
-                        print('[{} s] downloaded images: {} images'.format(int(time()) - start, img_count))
+                        print('[{} s] downloaded images: {} images. Motorcyle({}), Helmet({}), Person({})'
+                            .format(int(time()) - start, img_count, motorcycle_count, helmet_count, person_count))
                     
             if line_count % 20000 == 0:
                 print('[{} s] read csv: {} lines'.format(int(time()) - start, line_count))
