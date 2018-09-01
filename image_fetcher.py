@@ -61,7 +61,7 @@ def main():
                         CONTAIN_DEPICTION.add(image_id)
                         continue
                     class_count[valid_classes.index(label_name)] += 1
-                    CONTAIN_CLASSES[valid_classes.index(label_name)].add(image_id)
+                    CONTAIN_CLASSES[label_name].add(image_id)
                     if image_id not in image_box: # initialize list
                         image_box[image_id] = []
                     image_box[image_id].append([\
