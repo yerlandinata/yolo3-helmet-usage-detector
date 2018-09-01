@@ -1,11 +1,11 @@
+import argparse
 import numpy as np
-
 
 class YOLO_Kmeans:
 
     def __init__(self, cluster_number, filename):
         self.cluster_number = cluster_number
-        self.filename = "2012_train.txt"
+        self.filename = filename
 
     def iou(self, boxes, clusters):  # 1 box -> k clusters
         n = boxes.shape[0]
@@ -96,6 +96,9 @@ class YOLO_Kmeans:
 
 if __name__ == "__main__":
     cluster_number = 9
-    filename = "2012_train.txt"
+    ap = argparse.ArgumentParser()
+    ap.add_argument("-m", "--metadata", required=True, help="images metadata in YOLO qqwwee format")
+    args = vars(ap.parse_args())
+    filename = args['metadata']
     kmeans = YOLO_Kmeans(cluster_number, filename)
     kmeans.txt2clusters()
