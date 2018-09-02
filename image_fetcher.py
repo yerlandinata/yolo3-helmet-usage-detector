@@ -21,7 +21,7 @@ ANNOTATION_FILE_NAME = 'annotation.csv'
 BOXABLE_FILE_NAME = 'boxable.csv'
 OUTPUT_FILE_NAME = input('images metadata output file: ')
 OUTPUT_IMAGE_FOLDER_NAME = input('images output folder: ')
-IS_STRICT = input('strict filter? (Y/n)') in ['Y', 'y', '']
+IS_STRICT = input('strict filter? (Y/n): ') in ['Y', 'y', '']
 
 MOTORCYCLE_LABEL = '/m/04_sv'
 HELMET_LABEL = '/m/0zvk5'
@@ -116,7 +116,7 @@ def main():
                             (has_helmet and not has_person):
                             continue
                     else:
-                        if has_person and len(image_box[image_id]) <= 7:
+                        if has_person and len(image_box[image_id]) <= 7 and person_count < 2 * motorcycle_count:
                             pass
                         elif has_helmet and not has_person:
                             continue
@@ -151,11 +151,11 @@ def main():
                             int(image_box_data[XMAX] * width), \
                             int(image_box_data[YMAX] * height), \
                             image_box_data[LABEL]])
-                    if img_count % 300 == 0:
+                    if img_count % 100 == 0:
                         print('[{} s] downloaded images: {} images. Motorcyle({}), Helmet({}), Person({})'
                             .format(int(time()) - start, img_count, motorcycle_count, helmet_count, person_count))
                     
-            if line_count % 50000 == 0:
+            if line_count % 25000 == 0:
                 print('[{} s] read csv: {} lines'.format(int(time()) - start, line_count))
 
 
