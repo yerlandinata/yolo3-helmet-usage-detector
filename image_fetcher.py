@@ -34,6 +34,7 @@ YMAX = 3
 LABEL = 4
 CONTAIN_GROUP = set()
 CONTAIN_DEPICTION = set()
+CONTAIN_ACTIVMIL = set()
 CONTAIN_CLASSES = {i: set() for i in valid_classes}
 
 def main():
@@ -53,6 +54,7 @@ def main():
                 image_id = row[header.index('ImageID')]
                 is_group = row[header.index('IsGroupOf')] == '1'
                 is_depiction = row[header.index('IsDepiction')] == '1'
+                is_activmil = row[header.index('Source')] == 'activemil'
                 if label_name in valid_classes:
                     if is_group:
                         CONTAIN_GROUP.add(image_id)
@@ -106,8 +108,8 @@ def main():
                     has_helmet = image_id in CONTAIN_CLASSES[HELMET_LABEL]
                     has_person = image_id in CONTAIN_CLASSES[PERSON_LABEL]
 
-                    if has_person and len(image_box[image_id]) <= 3:
-                        pass # allow one person
+                    if has_person and len(image_box[image_id]) <= 3 and person_count < motorcycle_count:
+                        pass
                     elif (has_person and (not has_motor) and (not has_helmet)) or \
                         (has_helmet and not has_person):
                         continue
