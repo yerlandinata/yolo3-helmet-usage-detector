@@ -119,7 +119,7 @@ def main():
                     else:
                         if has_person and has_helmet:
                             pass
-                        elif has_person and (len(image_box[image_id]) > 7 or person_count > 3 * motorcycle_count):
+                        elif has_person and (len(image_box[image_id]) > 7 or person_count > 10 * motorcycle_count):
                             continue
 
                     motorcycle_count += int(has_motor)
