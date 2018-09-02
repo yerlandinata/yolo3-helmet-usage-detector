@@ -17,8 +17,9 @@ from datetime import datetime, timedelta
 
 # Static Variable
 
-ANNOTATION_FILE_NAME = 'annotation.csv'
-BOXABLE_FILE_NAME = 'boxable.csv'
+SUBSET = input('data subset (train/val/test): ')
+ANNOTATION_FILE_NAME = SUBSET + '-annotation.csv'
+BOXABLE_FILE_NAME = SUBSET + '-boxable.csv'
 OUTPUT_FILE_NAME = input('images metadata output file: ')
 OUTPUT_IMAGE_FOLDER_NAME = input('images output folder: ')
 IS_STRICT = input('strict filter? (Y/n): ') in ['Y', 'y', '']
