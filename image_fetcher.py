@@ -116,11 +116,9 @@ def main():
                         elif (has_person and (not has_motor) and (not has_helmet)) or \
                             (has_helmet and not has_person):
                             continue
-                    else:
-                        if has_person and len(image_box[image_id]) <= 7 and person_count < 2 * motorcycle_count:
-                            pass
-                        elif has_helmet and not has_person:
-                            continue
+                    elif (has_helmet and not has_person) or\
+                         (has_person and (len(image_box[image_id]) > 7 or person_count > 2 * motorcycle_count)):
+                        continue
 
                     motorcycle_count += int(has_motor)
                     helmet_count += int(has_helmet)
