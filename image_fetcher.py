@@ -21,6 +21,7 @@ ANNOTATION_FILE_NAME = 'annotation.csv'
 BOXABLE_FILE_NAME = 'boxable.csv'
 OUTPUT_FILE_NAME = input('images metadata output file: ')
 OUTPUT_IMAGE_FOLDER_NAME = input('images output folder: ')
+IS_STRICT = input('strict filter? (Y/n)') in ['Y', 'y', '']
 
 MOTORCYCLE_LABEL = '/m/04_sv'
 HELMET_LABEL = '/m/0zvk5'
@@ -108,11 +109,17 @@ def main():
                     has_helmet = image_id in CONTAIN_CLASSES[HELMET_LABEL]
                     has_person = image_id in CONTAIN_CLASSES[PERSON_LABEL]
 
-                    if has_person and len(image_box[image_id]) <= 3 and person_count < motorcycle_count:
-                        pass
-                    elif (has_person and (not has_motor) and (not has_helmet)) or \
-                        (has_helmet and not has_person):
-                        continue
+                    if IS_STRICT:
+                        if has_person and len(image_box[image_id]) <= 3 and person_count < motorcycle_count:
+                            pass
+                        elif (has_person and (not has_motor) and (not has_helmet)) or \
+                            (has_helmet and not has_person):
+                            continue
+                    else:
+                        if has_person and len(image_box[image_id]) <= 7:
+                            pass
+                        elif has_helmet and not has_person:
+                            continue
 
                     motorcycle_count += int(has_motor)
                     helmet_count += int(has_helmet)
