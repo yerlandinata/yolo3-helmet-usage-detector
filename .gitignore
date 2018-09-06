@@ -15,6 +15,7 @@ ocr/letter/*
 map/ground-truth
 map/predicted
 map/results*
+dataset_motor
 /*model*/
 /train.cfg
 
