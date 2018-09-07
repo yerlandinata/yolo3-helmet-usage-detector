@@ -8,6 +8,7 @@ from PIL import Image
 from keras import backend as K
 from yolo3.utils import letterbox_image
 from yolo import YOLO
+from detector.helmet_detector import BoundingBox
 
 class BenchmarkableYolo(YOLO):
 
@@ -25,6 +26,7 @@ class BenchmarkableYolo(YOLO):
         XMAX = 3
         YMAX = 2
         durations = []
+        res_dict = {c: [] for c in self.class_names}
         for i in range(test_size):
             print(i)
             args = lines[i].split()
@@ -35,6 +37,8 @@ class BenchmarkableYolo(YOLO):
             image_file = image_file_splitted[-1]
             with open(prediction_path + image_file.replace('.jpg', '.txt').replace('.png', '.txt') , 'w') as f:
                 for p in range(len(out_classes)):
+                    res_dict[self.class_names[out_classes[p]]] \
+                        .append(BoundingBox(boxes[p][XMIN], boxes[p][XMAX], boxes[p][YMIN], boxes[p][YMAX]))
                     f.write('{} {} {} {} {} {}\n'.format(
                         self.class_names[out_classes[p]],
                         scores[p],
@@ -45,6 +49,7 @@ class BenchmarkableYolo(YOLO):
                     ))
         print('Ran test on {} images, total duration: {}'.format(test_size, np.sum(durations)))
         print('average duration:', np.mean(durations))
+        return res_dict
 
     def detect_image(self, image):
         start = timer()

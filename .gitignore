@@ -18,6 +18,7 @@ map/results*
 dataset_motor
 /*model*/
 /train.cfg
+motor_indo_test.txt
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
