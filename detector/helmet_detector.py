@@ -12,6 +12,10 @@ class BoundingBox:
         self.x_max = x_max
         self.y_min = y_min
         self.y_max = y_max
+
+    def __repr__(self):
+        return 'BoundingBox ({}, {}), ({}, {})'.format(self.x_min, self.y_min, self.x_max, self.y_max)
+
     def is_intersect(self, other):
         # https://stackoverflow.com/questions/40795709/checking-whether-two-rectangles-overlap-in-python-using-two-bottom-left-corners
         return not (self.x_max < other.x_min or self.x_min > other.x_max or self.y_max < other.y_min or self.y_min > other.y_max)
@@ -65,6 +69,8 @@ input: bounding box, list of bounding box
 return driver box
 """
 def create_driver_box(motorcycle_box, person_in_motorcycle_boxes):
+    if not motorcycle_box or not person_in_motorcycle_boxes:
+        return None
     x_min = min(motorcycle_box.x_min, *list(map(lambda bounding_box: bounding_box.x_min, person_in_motorcycle_boxes)))
     x_max = max(motorcycle_box.x_max, *list(map(lambda bounding_box: bounding_box.x_max, person_in_motorcycle_boxes)))
     y_min = min(motorcycle_box.y_min, *list(map(lambda bounding_box: bounding_box.y_min, person_in_motorcycle_boxes)))

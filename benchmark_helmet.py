@@ -26,15 +26,16 @@ def main():
                 .append(BoundingBox(
                     int(boxes[p][XMIN]), int(boxes[p][XMAX]), int(boxes[p][YMIN]), int(boxes[p][YMAX])
                 ))
-        print('motor:', result['motor'])
-        print('orang:', result['orang'])
-        if len(result['orang']) == 0 or len(result['motor'] == 0):
+        if not result['orang'] or not result['motor']:
             continue
         rider_boxes = combine_motorcycle_and_person(result['motor'], result['orang'])
         draw = ImageDraw.Draw(image)
         for rb in rider_boxes:
-            draw.rectangle(((rb.x_min, rb.y_min), (rb.x_max, rb.y_max)), fill='blue')
-        image.show()
+            if not rb:
+                continue
+            cropped = image.crop((rb.x_min, rb.y_min, rb.x_max, rb.y_max))
+            cropped.show()
+        
 
 if __name__ == '__main__':
     main()
