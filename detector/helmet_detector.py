@@ -65,10 +65,15 @@ input: bounding box, list of bounding box
 return driver box
 """
 def create_driver_box(motorcycle_box, person_in_motorcycle_boxes):
-    x_min = min(motorcycle_box.x_min, *list(map(lambda bounding_box: bounding_box.x_min, person_in_motorcycle_boxes)))
-    x_max = max(motorcycle_box.x_max, *list(map(lambda bounding_box: bounding_box.x_max, person_in_motorcycle_boxes)))
-    y_min = min(motorcycle_box.y_min, *list(map(lambda bounding_box: bounding_box.y_min, person_in_motorcycle_boxes)))
-    y_max = max(motorcycle_box.y_max, *list(map(lambda bounding_box: bounding_box.y_max, person_in_motorcycle_boxes)))
+    # empty person list handling
+    person_boxes = [motorcycle_box]
+    if len(person_in_motorcycle_boxes) != 0:
+        person_boxes = person_in_motorcycle_boxes
+
+    x_min = min(motorcycle_box.x_min, *list(map(lambda bounding_box: bounding_box.x_min, person_boxes)))
+    x_max = max(motorcycle_box.x_max, *list(map(lambda bounding_box: bounding_box.x_max, person_boxes)))
+    y_min = min(motorcycle_box.y_min, *list(map(lambda bounding_box: bounding_box.y_min, person_boxes)))
+    y_max = max(motorcycle_box.y_max, *list(map(lambda bounding_box: bounding_box.y_max, person_boxes)))
     driver_box = DriverBox(x_min, x_max, y_min, y_max, len(person_in_motorcycle_boxes))
     return driver_box
 
