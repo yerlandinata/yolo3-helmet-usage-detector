@@ -107,9 +107,9 @@ def main():
                     has_helmet = image_id in CONTAIN_CLASSES[HELMET_LABEL]
                     has_head = image_id in CONTAIN_CLASSES[HEAD_LABEL]
 
-                    if IS_STRICT and head_count > 2 * motorcycle_count:
+                    if IS_STRICT and has_head and not has_motor and not has_helmet and head_count > 2 * motorcycle_count:
                         continue
-                    elif head_count > 10 * motorcycle_count:
+                    elif has_head and not has_motor and head_count > 10 * motorcycle_count:
                         continue
 
                     motorcycle_count += int(has_motor)
