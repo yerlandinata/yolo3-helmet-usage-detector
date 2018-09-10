@@ -7,11 +7,12 @@ PERSON_LABEL = "/m/01g317"
 valid_classes = [MOTORCYCLE_LABEL, HELMET_LABEL, PERSON_LABEL]
 
 class BoundingBox:
-    def __init__(self, x_min, x_max, y_min, y_max):
+    def __init__(self, x_min, x_max, y_min, y_max, confidence=0.0):
         self.x_min = x_min
         self.x_max = x_max
         self.y_min = y_min
         self.y_max = y_max
+        self.confidence = confidence
 
     def __repr__(self):
         return 'BoundingBox ({}, {}), ({}, {})'.format(self.x_min, self.y_min, self.x_max, self.y_max)
@@ -21,8 +22,8 @@ class BoundingBox:
         return not (self.x_max < other.x_min or self.x_min > other.x_max or self.y_max < other.y_min or self.y_min > other.y_max)
 
 class DriverBox(BoundingBox):
-    def __init__(self, x_min, x_max, y_min, y_max, person_count):
-        super().__init__(x_min, x_max, y_min, y_max)
+    def __init__(self, x_min, x_max, y_min, y_max, person_count, confidence=0.0):
+        super().__init__(x_min, x_max, y_min, y_max, confidence)
         self.person_count = person_count
 
 """
@@ -70,15 +71,14 @@ return driver box
 """
 def create_driver_box(motorcycle_box, person_in_motorcycle_boxes):
     # empty person list handling
-    person_boxes = [motorcycle_box]
-    if len(person_in_motorcycle_boxes) != 0:
-        person_boxes = person_in_motorcycle_boxes
+    if not person_in_motorcycle_boxes:
+        return None
 
-    x_min = min(motorcycle_box.x_min, *list(map(lambda bounding_box: bounding_box.x_min, person_boxes)))
-    x_max = max(motorcycle_box.x_max, *list(map(lambda bounding_box: bounding_box.x_max, person_boxes)))
-    y_min = min(motorcycle_box.y_min, *list(map(lambda bounding_box: bounding_box.y_min, person_boxes)))
-    y_max = max(motorcycle_box.y_max, *list(map(lambda bounding_box: bounding_box.y_max, person_boxes)))
-    driver_box = DriverBox(x_min, x_max, y_min, y_max, len(person_in_motorcycle_boxes))
+    x_min = min(motorcycle_box.x_min, *list(map(lambda bounding_box: bounding_box.x_min, person_in_motorcycle_boxes)))
+    x_max = max(motorcycle_box.x_max, *list(map(lambda bounding_box: bounding_box.x_max, person_in_motorcycle_boxes)))
+    y_min = min(motorcycle_box.y_min, *list(map(lambda bounding_box: bounding_box.y_min, person_in_motorcycle_boxes)))
+    y_max = max(motorcycle_box.y_max, *list(map(lambda bounding_box: bounding_box.y_max, person_in_motorcycle_boxes)))
+    driver_box = DriverBox(x_min, x_max, y_min, y_max, len(person_in_motorcycle_boxes), confidence=motorcycle_box.confidence)
     return driver_box
 
 """
