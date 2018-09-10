@@ -1,7 +1,4 @@
 '''
-Author: Endrawan Andika Wicaksana
-Modified by: Yudhistira Erlandinata
-
 Annotation
 ImageID,Source,LabelName,Confidence,XMin,XMax,YMin,YMax,IsOccluded,IsTruncated,IsGroupOf,IsDepiction,IsInside
 
