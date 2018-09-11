@@ -21,6 +21,14 @@ class BoundingBox:
         # https://stackoverflow.com/questions/40795709/checking-whether-two-rectangles-overlap-in-python-using-two-bottom-left-corners
         return not (self.x_max < other.x_min or self.x_min > other.x_max or self.y_max < other.y_min or self.y_min > other.y_max)
 
+    def get_intersection_area(self, other):
+        x_min = max(self.x_min, other.x_min)
+        x_max = min(self.x_max, other.x_max)
+        y_min = max(self.y_min, other.y_min)
+        y_max = min(self.y_max, other.y_max)
+        intersection_area = (x_max - x_min) * (y_max - y_min)
+        return intersection_area
+
 class DriverBox(BoundingBox):
     def __init__(self, x_min, x_max, y_min, y_max, person_count, confidence=0.0):
         super().__init__(x_min, x_max, y_min, y_max, confidence)
@@ -48,22 +56,46 @@ return list of driver box
 """
 def combine_motorcycle_and_person(motorcycle_boxes, person_boxes):
     driver_boxes = []
+    person_in_motorcycle_boxes_map = find_person_in_motorcycle(motorcycle_boxes, person_boxes)
     for motorcycle_box in motorcycle_boxes:
-        person_in_motorcycle_boxes = find_person_in_motorcycle(motorcycle_box, person_boxes)
+        person_in_motorcycle_boxes = person_in_motorcycle_boxes_map[motorcycle_box]
         driver_box = create_driver_box(motorcycle_box, person_in_motorcycle_boxes)
         driver_boxes.append(driver_box)
     return driver_boxes
 
 """
-input: bounding box, list of bounding box
-return list of bounding box
+input: list of bounding box, list of bounding box
+return dictionary with BoundingBox(): [BoundingBox(), ..]
 """
-def find_person_in_motorcycle(motorcycle_box, person_boxes):
-    person_in_motorcycle_boxes = []
+def find_person_in_motorcycle(motorcycle_boxes, person_boxes):
+    person_in_motorcycle_boxes_map = {}
+    for motorcycle_box in motorcycle_boxes:
+        person_in_motorcycle_boxes_map[motorcycle_box] = []
     for person_box in person_boxes:
+        motorcycle_box = find_nearest_motorcycle(person_box, motorcycle_boxes)
+        if motorcycle_box != None:
+            person_in_motorcycle_boxes_map[motorcycle_box].append(person_box)
+    return person_in_motorcycle_boxes_map
+
+"""
+input: bounding box, list of bounding box
+return bounding box
+"""
+def find_nearest_motorcycle(person_box, motorcycle_boxes):
+    nearest_motorcycle_box = None
+    for motorcycle_box in motorcycle_boxes:
         if motorcycle_box.is_intersect(person_box):
-            person_in_motorcycle_boxes.append(person_box)
-    return person_in_motorcycle_boxes
+            if nearest_motorcycle_box == None:
+                nearest_motorcycle_box = motorcycle_box
+            else:
+                intersection_area = motorcycle_box.get_intersection_area(person_box)
+                nearest_intersection_area = nearest_motorcycle_box.get_intersection_area(person_box)
+                if intersection_area == nearest_intersection_area:
+                    print('Same intersection area with', intersection_area)
+                    print('Person:', person_box)
+                elif intersection_area > nearest_intersection_area:
+                    nearest_motorcycle_box = motorcycle_box
+    return nearest_motorcycle_box
 
 """
 input: bounding box, list of bounding box
