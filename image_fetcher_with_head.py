@@ -148,6 +148,8 @@ def main():
                     
             if line_count % 25000 == 0:
                 print('[{} s] read csv: {} lines'.format(int(time()) - start, line_count))
+            if img_count >= 15000:
+                break
 
 
     # create new csv after convert data
