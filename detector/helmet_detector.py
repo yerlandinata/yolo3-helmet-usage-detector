@@ -132,12 +132,12 @@ def filter_driver_with_helmet(driver_boxes, helmet_boxes):
 input: driver box, list of bounding box
 return int
 """
-def count_sum_of_helmet_in_driver(driver_box, helmet_boxes):
-    sum_of_helmet = 0
-    for helmet_box in helmet_boxes:
-        if driver_box.is_intersect(helmet_box):
-            sum_of_helmet += 1
-    return sum_of_helmet
+def count_sum_of_object_in_box(box, objects):
+    sum_of_objects = 0
+    for object_box in objects:
+        if box.is_intersect(object_box):
+            sum_of_objects += 1
+    return sum_of_objects
 
 """
 input: list of bounding box, list of bounding box

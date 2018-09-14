@@ -31,7 +31,7 @@ if args.set_class_iou is not None:
   specific_iou_flagged = True
 
 # if there are no images then no animation can be shown
-img_path = '../validation'
+img_path = '../dataset_motor'
 if os.path.exists(img_path): 
   for dirpath, dirnames, files in os.walk(img_path):
     if not files:
@@ -49,6 +49,8 @@ if not args.no_animation:
   except ImportError:
     print("\"opencv-python\" not found, please install to visualize the results.")
     args.no_animation = True
+
+show_animation = False
 
 # try to import Matplotlib if the user didn't choose the option --no-plot
 draw_plot = False

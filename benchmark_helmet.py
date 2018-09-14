@@ -1,7 +1,7 @@
 '''
 Author: Yudhistira Erlandinata
 '''
-from PIL import Image, ImageDraw
+from PIL import Image, ImageDraw, ImageEnhance
 from benchmark import BenchmarkableYolo
 from detector.helmet_detector import BoundingBox, combine_motorcycle_and_person
 
@@ -14,6 +14,16 @@ XMAX = 3
 YMAX = 2
 LIGHT_GREEN = '#41f444'
 LIGHT_BLUE = '#4286f4'
+CONTRAST_FACTOR = 2
+SHARPEN_FACTOR = 1.5
+COLOR_BALANCE_FACTOR = 4
+BRIGHTNESS_FACTOR = 1.0
+ENHANCEMENT = (
+    (ImageEnhance.Color, COLOR_BALANCE_FACTOR),
+    (ImageEnhance.Sharpness, SHARPEN_FACTOR),
+    (ImageEnhance.Contrast, CONTRAST_FACTOR),
+    (ImageEnhance.Brightness, BRIGHTNESS_FACTOR),
+)
 
 def main():
     yolo = BenchmarkableYolo()
@@ -37,7 +47,7 @@ def main():
         line_width = int(image.height * 0.005)
         map_result = ''
         for rb in [r for r in rider_boxes if r]:
-            extended_rb = BoundingBox(rb.x_min, rb.x_max, rb.y_min - max(int(line_width * 4), 0), rb.y_max, confidence=rb.confidence)
+            extended_rb = BoundingBox(rb.x_min, rb.x_max, rb.y_min - max(int(line_width * 7), 0), rb.y_max, confidence=rb.confidence)
             cropped = image.crop((extended_rb.x_min, extended_rb.y_min, extended_rb.x_max, extended_rb.y_max))
             map_result += find_helmet(yolo, cropped, extended_rb, draw, line_width)            
         # second chance
@@ -47,9 +57,7 @@ def main():
                 confidence=motor.confidence
             )
             cropped = image.crop((extended_motor.x_min, extended_motor.y_min, extended_motor.x_max, extended_motor.y_max))
-            orang = find_object(yolo, cropped, 'orang')
-            if orang:
-                map_result += find_helmet(yolo, cropped, extended_motor, draw, line_width)
+            map_result += find_helmet(yolo, cropped, extended_motor, draw, line_width)
         image.save(RESULT_IMAGE_PATH + image_file.split('/')[1])
         with open(MAP_RESULT_PATH + image_file.split('/')[1].replace('.jpg', '.txt'), 'w') as f:
             f.write(map_result)
@@ -72,16 +80,21 @@ def find_helmet(yolo, image, rider, draw, line_width):
         (rider.x_min, rider.y_min),
     ), width=line_width, fill=LIGHT_GREEN if helmet else 'red')
     return '{} {} {} {} {} {}\n'.format(
-        'Pengendara Menggunakan Helm' if helmet else 'Penggendara Tanpa Helm',
+        'Pengendara_Menggunakan_Helm' if helmet else 'Pengendara_Tanpa_Helm',
         rider.confidence, int(rider.x_min), int(rider.y_min), int(rider.x_max), int(rider.y_max)
     )
 
 def find_object(yolo, image, object_name):
-    duration, out_classes, boxes, scores = yolo.detect_image(image)
+    duration, out_classes, boxes, scores = yolo.detect_image(enhance(image))
     for p in range(len(out_classes)):
         if yolo.class_names[out_classes[p]] == object_name:
             return BoundingBox(boxes[p][XMIN], boxes[p][XMAX], boxes[p][YMIN], boxes[p][YMAX], confidence=scores[p])
     return None
+
+def enhance(image):
+    for Enhancer, factor in ENHANCEMENT:
+        image = Enhancer(image).enhance(factor)
+    return image
 
 if __name__ == '__main__':
     main()
